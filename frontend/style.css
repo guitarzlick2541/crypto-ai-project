@@ -1,0 +1,26 @@
+body {
+    background: #0b0f14;
+    color: white;
+    font-family: Arial;
+}
+
+nav {
+    background: #111;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    background: #00ffa3;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.card {
+    background: #151a21;
+    margin: 40px;
+    padding: 20px;
+    border-radius: 10px;
+}
