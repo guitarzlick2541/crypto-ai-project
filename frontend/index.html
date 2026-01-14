@@ -699,6 +699,41 @@
                             </div>
                         </div>
 
+                        <!-- AI Model Management -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z">
+                                    </path>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                                <h3>AI Model Management</h3>
+                            </div>
+                            <div class="settings-body">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Retrain Model</label>
+                                        <p>Train new model with latest data</p>
+                                    </div>
+                                    <div class="control-group" style="flex-direction: row; gap: 8px;">
+                                        <select id="retrainTimeframe" class="setting-select" style="width: auto;">
+                                            <option value="5m">5 Minutes</option>
+                                            <option value="1h" selected>1 Hour</option>
+                                            <option value="4h">4 Hours</option>
+                                        </select>
+                                        <button class="btn-secondary" onclick="retrainModel()" id="btnRetrain">
+                                            Start Training
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="retrainStatus"
+                                    style="font-size: 12px; color: var(--accent-orange); display: none;">
+                                    Training in progress... please wait (~30s)
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Danger Zone -->
                         <div class="settings-card danger">
                             <div class="settings-card-header">

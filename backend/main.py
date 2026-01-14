@@ -6,7 +6,9 @@ from data_service import get_klines, get_ohlcv_data
 from scheduler import start_scheduler, stop_scheduler, get_scheduler_status
 from db import init_db
 from datetime import datetime
-
+import subprocess
+import sys
+import os
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -19,6 +21,45 @@ async def lifespan(app: FastAPI):
     stop_scheduler()
 
 app = FastAPI(title="CryptoAI API", version="1.0.0", lifespan=lifespan)
+
+# ... (Existing code) ...
+
+@app.post("/retrain")
+def retrain_model(timeframe: str = "1h"):
+    """สั่งเทรนโมเดลใหม่ตาม Timeframe ที่ระบุ"""
+    script_map = {
+        "5m": "train_lstm_5m.py",
+        "1h": "train_lstm_1h.py",
+        "4h": "train_lstm_4h.py"
+    }
+
+    if timeframe not in script_map:
+        return {"status": "error", "message": "Invalid timeframe"}
+
+    script_name = script_map[timeframe]
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    script_path = os.path.join(current_dir, script_name)
+    
+    try:
+        # รันสคริปต์เทรนแยกเป็น Subprocess (อาจใช้เวลาสักพัก)
+        result = subprocess.run(
+            [sys.executable, script_path], 
+            capture_output=True, 
+            text=True,
+            check=True
+        )
+        return {
+            "status": "success", 
+            "message": f"Model {timeframe} retrained successfully",
+            "logs": result.stdout[-200:] # ส่ง Log พารากราฟสุดท้ายกลับไปให้ดู
+        }
+    except subprocess.CalledProcessError as e:
+        return {
+            "status": "error", 
+            "message": f"Training failed: {e.stderr}"
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 app.add_middleware(
     CORSMiddleware,
