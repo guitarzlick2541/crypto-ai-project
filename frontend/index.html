@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoAI - Crypto Price Prediction Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <!-- แถบเมนูด้านข้าง (Sidebar) -->
+        <aside class="sidebar">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#22c55e" stroke-width="2" />
+                    <path d="M12 6v12M8 10l4-4 4 4M8 14l4 4 4-4" stroke="#22c55e" stroke-width="2"
+                        stroke-linecap="round" />
+                </svg>
+                <span class="logo-text">CryptoAI</span>
+            </div>
+            <nav class="nav">
+                <a class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a class="nav-item" data-page="prediction" onclick="showPage('prediction')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                    <span class="nav-text">Price Prediction</span>
+                </a>
+                <a class="nav-item" data-page="history" onclick="showPage('history')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8v4l3 3" />
+                        <circle cx="12" cy="12" r="9" />
+                    </svg>
+                    <span class="nav-text">History Data</span>
+                </a>
+                <a class="nav-item" data-page="performance" onclick="showPage('performance')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3v18h18" />
+                        <path d="M18 9l-5 5-4-4-6 6" />
+                    </svg>
+                    <span class="nav-text">Performance</span>
+                </a>
+                <a class="nav-item" data-page="settings" onclick="showPage('settings')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                    </svg>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- เนื้อหาหลัก (Main Content) -->
+        <main class="main">
+            <!-- ส่วนหัว (Header) -->
+            <header class="header">
+                <h1 class="header-title">
+                    <span class="title-primary">Crypto Price Prediction</span>
+                    <span class="title-secondary">Dashboard</span>
+                </h1>
+                <div class="header-actions">
+                    <div class="user-profile">
+                        <div class="avatar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                        <span>Welcome, User</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ==================== หน้า Dashboard ==================== -->
+            <div id="page-dashboard" class="page active">
+                <div class="content">
+                    <!-- แถวตัวเลือก (Selectors) -->
+                    <div class="selectors-row">
+                        <div class="coin-selector">
+                            <label>Select Coin:</label>
+                            <div class="coin-buttons">
+                                <button class="coin-btn active" data-coin="BTC">
+                                    <svg class="coin-icon btc" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="11" fill="#F7931A" />
+                                        <path
+                                            d="M15.5 10.5c.3-1.8-1.1-2.7-3-3.4l.6-2.5-1.5-.4-.6 2.4c-.4-.1-.8-.2-1.2-.3l.6-2.4-1.5-.4-.6 2.5c-.3-.1-.6-.1-.9-.2l-2-.5-.4 1.6s1.1.3 1.1.3c.6.1.7.5.7.8l-.7 2.9c0 0 .1 0 .2.1h-.2l-1 4c-.1.2-.3.5-.7.4 0 0-1.1-.3-1.1-.3l-.7 1.7 1.9.5c.4.1.7.2 1 .3l-.6 2.5 1.5.4.6-2.5c.4.1.8.2 1.2.3l-.6 2.5 1.5.4.6-2.5c2.6.5 4.5.3 5.3-2 .7-1.9-.1-2.9-1.4-3.6 1-.2 1.8-.9 2-2.2zm-3.6 5c-.5 2-3.8.9-4.9.6l.9-3.5c1.1.3 4.5.8 4 2.9zm.5-5c-.5 1.8-3.2.9-4.1.7l.8-3.1c.9.2 3.8.6 3.3 2.4z"
+                                            fill="white" />
+                                    </svg>
+                                    <span>BTC</span>
+                                </button>
+                                <button class="coin-btn" data-coin="ETH">
+                                    <svg class="coin-icon eth" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="11" fill="#627EEA" />
+                                        <path d="M12 4l-5 8 5 3 5-3-5-8z" fill="white" fill-opacity="0.6" />
+                                        <path d="M12 4v7l5 1-5-8z" fill="white" />
+                                        <path d="M12 16l-5-3 5 7 5-7-5 3z" fill="white" fill-opacity="0.6" />
+                                        <path d="M12 16v4l5-7-5 3z" fill="white" />
+                                    </svg>
+                                    <span>ETH</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="timeframe-selector">
+                            <label>Select Timeframe:</label>
+                            <select id="timeframe">
+                                <option value="5m">5 Minutes</option>
+                                <option value="1h" selected>1 Hour</option>
+                                <option value="4h">4 Hours</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- การ์ดกราฟ (Chart Card) -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2>
+                                <span id="coinName">Bitcoin</span>
+                                (<span id="coinPair">BTC/USDT</span>) Price Chart
+                            </h2>
+                            <div class="chart-actions">
+                                <button class="predict-btn" onclick="loadPrediction()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                    </svg>
+                                    PREDICTION
+                                </button>
+                                <div class="trend-indicator" id="trendIndicator">
+                                    <svg class="trend-arrow" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 4l-8 8h5v8h6v-8h5z" />
+                                    </svg>
+                                    <span>Trend: <span id="trendText">Uptrend</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-line white"></span>
+                                <span>Actual Price</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-line green"></span>
+                                <span>Predicted Price</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- การ์ดสถิติ (Stats Cards) -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <h3>MAE</h3>
+                                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                </svg>
+                            </div>
+                            <div class="stat-value" id="maeValue">-</div>
+                            <p class="stat-label">Mean Absolute Error</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <h3>RMSE</h3>
+                                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <circle cx="12" cy="12" r="6" />
+                                    <circle cx="12" cy="12" r="2" />
+                                </svg>
+                            </div>
+                            <div class="stat-value rmse" id="rmseValue">-</div>
+                            <p class="stat-label">Root Mean Squared Error</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <h3>Current Price</h3>
+                                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" x2="12" y1="2" y2="22" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                            </div>
+                            <div class="stat-value price" id="currentPrice">-</div>
+                            <p class="stat-label" id="currentCoinLabel">BTC / USDT</p>
+                        </div>
+                        <div class="stat-card highlight">
+                            <div class="stat-card-header">
+                                <h3>Prediction Price</h3>
+                                <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg>
+                            </div>
+                            <div class="stat-value prediction" id="predictedPrice">-</div>
+                            <p class="stat-label" id="predictionLabel">Next 1 Hour</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== หน้า Prediction ==================== -->
+            <div id="page-prediction" class="page">
+                <div class="content">
+                    <div class="page-header">
+                        <h2>
+                            <svg class="page-title-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+                                <path
+                                    d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
+                                <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" />
+                                <path d="M17.599 6.5a3 3 0 0 0 .399-1.375" />
+                                <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" />
+                                <path d="M3.477 10.896a4 4 0 0 1 .585-.396" />
+                                <path d="M19.938 10.5a4 4 0 0 1 .585.396" />
+                                <path d="M6 18a4 4 0 0 1-1.967-.516" />
+                                <path d="M19.967 17.484A4 4 0 0 1 18 18" />
+                            </svg>
+                            AI Price Prediction
+                        </h2>
+                        <p>Real-time cryptocurrency price prediction powered by LSTM neural network</p>
+                    </div>
+
+                    <div class="prediction-controls">
+                        <div class="control-group">
+                            <label>Cryptocurrency</label>
+                            <select id="pred-coin">
+                                <option value="BTC">Bitcoin (BTC)</option>
+                                <option value="ETH">Ethereum (ETH)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Timeframe</label>
+                            <select id="pred-timeframe">
+                                <option value="5m">5 Minutes</option>
+                                <option value="1h" selected>1 Hour</option>
+                                <option value="4h">4 Hours</option>
+                            </select>
+                        </div>
+                        <button class="action-btn" onclick="runPrediction()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                            Run Prediction
+                        </button>
+                    </div>
+
+                    <div class="prediction-results">
+                        <div class="result-card large">
+                            <div class="result-header">
+                                <svg class="result-icon-svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 3v18h18" />
+                                    <path d="m19 9-5 5-4-4-3 3" />
+                                </svg>
+                                <h3>Price Chart</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="predictionChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="result-grid">
+                            <div class="result-card">
+                                <div class="result-header">
+                                    <svg class="result-icon-svg" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" x2="12" y1="2" y2="22" />
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                    </svg>
+                                    <h3>Current Price</h3>
+                                </div>
+                                <div class="result-value" id="pred-current">-</div>
+                            </div>
+                            <div class="result-card accent">
+                                <div class="result-header">
+                                    <svg class="result-icon-svg" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                    </svg>
+                                    <h3>Predicted Price</h3>
+                                </div>
+                                <div class="result-value" id="pred-predicted">-</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-header">
+                                    <svg class="result-icon-svg" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                                        <polyline points="16 7 22 7 22 13" />
+                                    </svg>
+                                    <h3>Trend</h3>
+                                </div>
+                                <div class="result-value trend" id="pred-trend">-</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="result-header">
+                                    <svg class="result-icon-svg" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                    </svg>
+                                    <h3>MAE / RMSE</h3>
+                                </div>
+                                <div class="result-value small" id="pred-errors">- / -</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== หน้า History ==================== -->
+            <div id="page-history" class="page">
+                <div class="content">
+                    <div class="page-header">
+                        <h2>
+                            <svg class="page-title-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                                <path d="M12 7v5l4 2" />
+                            </svg>
+                            Historical Data
+                        </h2>
+                        <p>OHLCV price data with Auto Sync from Binance API</p>
+                    </div>
+
+                    <!-- การ์ด Auto Sync -->
+                    <div class="sync-card">
+                        <div class="sync-header">
+                            <div class="sync-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12a9 9 0 11-9-9" />
+                                    <polyline points="21 3 21 9 15 9" />
+                                </svg>
+                                <h3>Auto Sync</h3>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="sync-settings">
+                            <div class="sync-setting">
+                                <label>Sync Interval</label>
+                                <select id="syncInterval">
+                                    <option value="10">10 seconds</option>
+                                    <option value="30" selected>30 seconds</option>
+                                    <option value="60">1 minute</option>
+                                    <option value="300">5 minutes</option>
+                                </select>
+                            </div>
+                            <div class="sync-setting">
+                                <label>Status</label>
+                                <div class="sync-status">
+                                    <span class="status-dot" id="syncStatusDot"></span>
+                                    <span id="syncStatusText">Sync Off</span>
+                                </div>
+                            </div>
+                            <div class="sync-setting">
+                                <label>Next Update</label>
+                                <div class="sync-info-box">
+                                    <span id="syncCountdown">--</span>
+                                </div>
+                            </div>
+                            <div class="sync-setting">
+                                <label>Last Update</label>
+                                <div class="sync-info-box">
+                                    <span id="lastSyncTime">Never</span>
+                                    <span class="divider">|</span>
+                                    <span><span id="syncRecordCount">0</span> recs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-controls">
+                        <div class="control-group">
+                            <label>Cryptocurrency</label>
+                            <select id="hist-coin">
+                                <option value="BTC">Bitcoin (BTC)</option>
+                                <option value="ETH">Ethereum (ETH)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Timeframe</label>
+                            <select id="hist-timeframe">
+                                <option value="1m">1 Minute</option>
+                                <option value="5m">5 Minutes</option>
+                                <option value="15m">15 Minutes</option>
+                                <option value="1h" selected>1 Hour</option>
+                                <option value="4h">4 Hours</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Records</label>
+                            <select id="hist-limit">
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <button class="action-btn" onclick="loadHistoryData()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 11-9-9" />
+                                <polyline points="21 3 21 9 15 9" />
+                            </svg>
+                            Load Data
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table" id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Open</th>
+                                    <th>High</th>
+                                    <th>Low</th>
+                                    <th>Close</th>
+                                    <th>Volume</th>
+                                    <th>Change %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <tr>
+                                    <td colspan="8" class="loading-text">Click "Load Data" to fetch historical data</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== หน้า Performance ==================== -->
+            <div id="page-performance" class="page">
+                <div class="content">
+                    <div class="page-header">
+                        <h2>
+                            <svg class="page-title-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3v18h18" />
+                                <path d="m19 9-5 5-4-4-3 3" />
+                            </svg>
+                            Model Performance
+                        </h2>
+                        <p>AI model accuracy and backtest results</p>
+                    </div>
+
+                    <div class="performance-controls">
+                        <div class="control-group">
+                            <label>Cryptocurrency</label>
+                            <select id="perf-coin">
+                                <option value="BTC">Bitcoin (BTC)</option>
+                                <option value="ETH">Ethereum (ETH)</option>
+                            </select>
+                        </div>
+                        <button class="action-btn" onclick="loadPerformance()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18" />
+                                <path d="M18 9l-5 5-4-4-6 6" />
+                            </svg>
+                            Analyze Performance
+                        </button>
+                    </div>
+
+                    <div class="performance-grid" id="performanceGrid">
+                        <!-- 5m Card -->
+                        <div class="perf-card">
+                            <div class="perf-header">
+                                <span class="perf-timeframe">5 Minutes</span>
+                                <span class="perf-badge">5m</span>
+                            </div>
+                            <div class="perf-metrics">
+                                <div class="perf-metric">
+                                    <span class="metric-label">MAE</span>
+                                    <span class="metric-value" id="perf-5m-mae">-</span>
+                                </div>
+                                <div class="perf-metric">
+                                    <span class="metric-label">RMSE</span>
+                                    <span class="metric-value" id="perf-5m-rmse">-</span>
+                                </div>
+                                <div class="perf-metric highlight">
+                                    <span class="metric-label">Accuracy</span>
+                                    <span class="metric-value" id="perf-5m-acc">-</span>
+                                </div>
+                            </div>
+                            <div class="perf-prediction">
+                                <span>Current: <b id="perf-5m-current">-</b></span>
+                                <span>Predicted: <b id="perf-5m-pred">-</b></span>
+                            </div>
+                        </div>
+
+                        <!-- 1h Card -->
+                        <div class="perf-card">
+                            <div class="perf-header">
+                                <span class="perf-timeframe">1 Hour</span>
+                                <span class="perf-badge">1h</span>
+                            </div>
+                            <div class="perf-metrics">
+                                <div class="perf-metric">
+                                    <span class="metric-label">MAE</span>
+                                    <span class="metric-value" id="perf-1h-mae">-</span>
+                                </div>
+                                <div class="perf-metric">
+                                    <span class="metric-label">RMSE</span>
+                                    <span class="metric-value" id="perf-1h-rmse">-</span>
+                                </div>
+                                <div class="perf-metric highlight">
+                                    <span class="metric-label">Accuracy</span>
+                                    <span class="metric-value" id="perf-1h-acc">-</span>
+                                </div>
+                            </div>
+                            <div class="perf-prediction">
+                                <span>Current: <b id="perf-1h-current">-</b></span>
+                                <span>Predicted: <b id="perf-1h-pred">-</b></span>
+                            </div>
+                        </div>
+
+                        <!-- 4h Card -->
+                        <div class="perf-card">
+                            <div class="perf-header">
+                                <span class="perf-timeframe">4 Hours</span>
+                                <span class="perf-badge">4h</span>
+                            </div>
+                            <div class="perf-metrics">
+                                <div class="perf-metric">
+                                    <span class="metric-label">MAE</span>
+                                    <span class="metric-value" id="perf-4h-mae">-</span>
+                                </div>
+                                <div class="perf-metric">
+                                    <span class="metric-label">RMSE</span>
+                                    <span class="metric-value" id="perf-4h-rmse">-</span>
+                                </div>
+                                <div class="perf-metric highlight">
+                                    <span class="metric-label">Accuracy</span>
+                                    <span class="metric-value" id="perf-4h-acc">-</span>
+                                </div>
+                            </div>
+                            <div class="perf-prediction">
+                                <span>Current: <b id="perf-4h-current">-</b></span>
+                                <span>Predicted: <b id="perf-4h-pred">-</b></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== หน้า Settings ==================== -->
+            <div id="page-settings" class="page">
+                <div class="content">
+                    <div class="page-header">
+                        <h2>
+                            <svg class="page-title-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                </path>
+                            </svg>
+                            Settings
+                        </h2>
+                        <p>Manage your application preferences and configuration</p>
+                    </div>
+
+                    <div class="settings-grid">
+                        <!-- API Configuration -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                    <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                                    <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                                </svg>
+                                <h3>API & Network</h3>
+                            </div>
+                            <div class="settings-body">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Backend URL</label>
+                                        <p>Address of the FastAPI server</p>
+                                    </div>
+                                    <input type="text" value="http://127.0.0.1:8000" id="apiUrl" readonly
+                                        class="setting-input-text">
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Server Status</label>
+                                        <p>Current connection state</p>
+                                    </div>
+                                    <div class="status-badge online">
+                                        <span class="status-dot-pulse"></span>
+                                        Connected
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- General Preferences -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v8"></path>
+                                    <path d="m4.93 10.93 1.41 1.41"></path>
+                                    <path d="M2 18h2"></path>
+                                    <path d="M20 18h2"></path>
+                                    <path d="m19.07 10.93-1.41 1.41"></path>
+                                    <path d="M22 22H2"></path>
+                                    <path d="m8 22 4-10 4 10"></path>
+                                </svg>
+                                <h3>Preferences</h3>
+                            </div>
+                            <div class="settings-body">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Currency</label>
+                                        <p>Display currency for predictions</p>
+                                    </div>
+                                    <select class="setting-select">
+                                        <option value="USD" selected>USD ($)</option>
+                                        <option value="THB">THB (฿)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Theme</label>
+                                        <p>Application visual theme</p>
+                                    </div>
+                                    <select class="setting-select">
+                                        <option value="dark" selected>Dark Moon</option>
+                                        <option value="light">Light Sun</option>
+                                        <option value="system">System Default</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notifications (Mock) -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                                <h3>Notifications</h3>
+                            </div>
+                            <div class="settings-body">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Price Alerts</label>
+                                        <p>Notify when price hits target</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Trend Change</label>
+                                        <p>Notify on trend reversal</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="settings-card danger">
+                            <div class="settings-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                                    </path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <h3>System Actions</h3>
+                            </div>
+                            <div class="settings-body">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Clear Local Cache</label>
+                                        <p>Clear temporary frontend data</p>
+                                    </div>
+                                    <button class="btn-secondary">Clear Cache</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

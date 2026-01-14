@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Database
+*.db
+*.sqlite3
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Custom
+backend/models/*.pkl
+# backend/models/*.keras  <-- ถ้าอยากเก็บโมเดลไว้บน GitHub ให้เอาบรรทัดนี้ออก (แนะนำให้เก็บไว้ถ้าไฟล์ไม่ใหญ่)
