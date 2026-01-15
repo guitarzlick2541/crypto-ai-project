@@ -6,6 +6,10 @@ Features: close, open, high, low, volume, price_change, volatility,
 """
 
 import os
+import sys
+# บังคับ encoding เป็น utf-8 เพื่อรองรับ path ภาษาไทย
+sys.stdout.reconfigure(encoding='utf-8')
+
 import numpy as np
 import joblib
 from data_service import get_training_data
@@ -17,18 +21,22 @@ from tensorflow.keras.optimizers import Adam
 
 # ===== การตั้งค่า Configuration =====
 TIMEFRAME = "4h"
-MODEL_PATH = "../models/lstm_4h.h5"
-SCALER_PATH = "../models/scaler_4h.pkl"
 WINDOW = 20  # จำนวนแท่งเทียนที่ใช้เป็น input
 EPOCHS = 100
 BATCH_SIZE = 32
 VALIDATION_SPLIT = 0.2
 
+# ใช้ absolute path จากตำแหน่งของไฟล์นี้
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(os.path.dirname(CURRENT_DIR), "models")
+MODEL_PATH = os.path.join(MODELS_DIR, f"lstm_{TIMEFRAME}.h5")
+SCALER_PATH = os.path.join(MODELS_DIR, f"scaler_{TIMEFRAME}.pkl")
+
 print(f"Training LSTM model for {TIMEFRAME} timeframe...")
 print("=" * 50)
 
 # ===== สร้างโฟลเดอร์ models ถ้ายังไม่มี =====
-os.makedirs("../models", exist_ok=True)
+os.makedirs(MODELS_DIR, exist_ok=True)
 
 # ===== ดึงข้อมูล Training Data =====
 print("Fetching training data with multiple features...")

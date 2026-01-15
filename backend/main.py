@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from ai_engine import predict_price, predict_with_history
+from ai_engine import predict_price, predict_with_history, models, scalers, MODELS_DIR, load_specific_model
 from backtest import backtest
 from data_service import get_klines, get_ohlcv_data
 from scheduler import start_scheduler, stop_scheduler, get_scheduler_status
@@ -46,11 +46,16 @@ def retrain_model(timeframe: str = "1h"):
             [sys.executable, script_path], 
             capture_output=True, 
             text=True,
+            encoding='utf-8',  # บังคับอ่าน output เป็น utf-8
             check=True
         )
+        
+        # Reload โมเดลใหม่ทันที
+        load_specific_model(timeframe)
+        
         return {
             "status": "success", 
-            "message": f"Model {timeframe} retrained successfully",
+            "message": f"Model {timeframe} retrained and reloaded successfully",
             "logs": result.stdout[-200:] # ส่ง Log พารากราฟสุดท้ายกลับไปให้ดู
         }
     except subprocess.CalledProcessError as e:
@@ -79,7 +84,20 @@ def home():
     return {
         "status": "CryptoAI API Running",
         "supported_coins": list(SUPPORTED_COINS.keys()),
-        "endpoints": ["/predict", "/backtest", "/coins", "/history", "/ohlcv", "/performance"]
+        "endpoints": ["/predict", "/backtest", "/coins", "/history", "/ohlcv", "/performance", "/debug/models"]
+    }
+
+@app.get("/debug/models")
+def debug_models():
+    """ตรวจสอบสถานะการโหลดโมเดล AI"""
+    return {
+        "models_directory": MODELS_DIR,
+        "directory_exists": os.path.exists(MODELS_DIR),
+        "loaded_models": list(models.keys()),
+        "loaded_scalers": list(scalers.keys()),
+        "models_count": len(models),
+        "scalers_count": len(scalers),
+        "status": "OK" if len(models) == 3 else "MODELS_NOT_LOADED"
     }
 
 @app.get("/coins")

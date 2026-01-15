@@ -25,49 +25,69 @@ FEATURE_COLUMNS = [
     "volume_change", "price_position"
 ]
 
-# โหลดโมเดลและ Scaler สำหรับแต่ละ timeframe
-print("Loading AI models and scalers...")
+# ตัวแปร Global เก็บโมเดลและ scaler
 models = {}
 scalers = {}
 
-for tf in ["5m", "1h", "4h"]:
-    # โหลดโมเดล
-    model_path = f"../models/lstm_{tf}.h5"
-    scaler_path = f"../models/scaler_{tf}.pkl"
+# ใช้ absolute path จากตำแหน่งของไฟล์นี้
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(os.path.dirname(CURRENT_DIR), "models")
+
+def load_specific_model(timeframe):
+    """โหลดโมเดลและ Scaler สำหรับ timeframe ที่ระบุ (ใช้สำหรับ Reload หลัง Retrain)"""
+    global models, scalers
+    
+    model_path = os.path.join(MODELS_DIR, f"lstm_{timeframe}.h5")
+    scaler_path = os.path.join(MODELS_DIR, f"scaler_{timeframe}.pkl")
+    
+    print(f"Loading {timeframe} model from: {model_path}")
     
     try:
         if os.path.exists(model_path):
-            models[tf] = load_model(model_path, compile=False)
-            print(f"  ✓ Loaded {tf} model")
+            models[timeframe] = load_model(model_path, compile=False)
+            print(f"  ✓ Loaded {timeframe} model successfully")
         else:
             print(f"  ✗ Model not found: {model_path}")
+            if timeframe in models:
+                del models[timeframe]
     except Exception as e:
-        print(f"  ✗ Failed to load {tf} model: {e}")
+        import traceback
+        print(f"  ✗ Failed to load {timeframe} model: {type(e).__name__}: {e}")
+        traceback.print_exc()
+        if timeframe in models:
+            del models[timeframe]
     
-    # โหลด Scaler (ถ้ามี)
     try:
         if os.path.exists(scaler_path):
-            scalers[tf] = joblib.load(scaler_path)
-            print(f"  ✓ Loaded {tf} scaler")
+            scalers[timeframe] = joblib.load(scaler_path)
+            print(f"  ✓ Loaded {timeframe} scaler")
         else:
-            print(f"  ⚠ Scaler not found: {scaler_path} (will use dynamic scaling)")
+            print(f"  ⚠ Scaler not found: {scaler_path}")
+            if timeframe in scalers:
+                del scalers[timeframe]
     except Exception as e:
-        print(f"  ⚠ Failed to load {tf} scaler: {e}")
+        print(f"  ⚠ Failed to load {timeframe} scaler: {e}")
+        if timeframe in scalers:
+            del scalers[timeframe]
 
-print("Models loaded!")
+def load_all_models():
+    """โหลดโมเดลทั้งหมดตอนเริ่มต้น"""
+    print("Loading AI models and scalers...")
+    print(f"  Models directory: {MODELS_DIR}")
+    print(f"  Directory exists: {os.path.exists(MODELS_DIR)}")
+    
+    for tf in ["5m", "1h", "4h"]:
+        load_specific_model(tf)
+        
+    print(f"Models loaded! ({len(models)} models, {len(scalers)} scalers)")
+
+# โหลดโมเดลทั้งหมดทันทีเมื่อ import
+load_all_models()
 
 
 def predict_price(symbol: str = "BTCUSDT", timeframe: str = "1h"):
     """
     ทำนายราคาถัดไปสำหรับเหรียญและ timeframe ที่กำหนด
-    ใช้ Multi-Feature Input และ Dynamic Scaling ต่อเหรียญ
-    
-    Args:
-        symbol: สัญลักษณ์เหรียญ เช่น BTCUSDT, ETHUSDT
-        timeframe: กรอบเวลา เช่น 5m, 1h, 4h
-    
-    Returns: 
-        Tuple ของ (current_price, predicted_price)
     """
     # ดึงข้อมูลพร้อม features
     df, _ = get_training_data(symbol=symbol, interval=timeframe, limit=WINDOW + 100)
@@ -80,7 +100,7 @@ def predict_price(symbol: str = "BTCUSDT", timeframe: str = "1h"):
     
     model = models[timeframe]
     
-    # ใช้ Dynamic Scaling เพื่อให้ได้ผลลัพธ์ที่เหมาะกับเหรียญนั้นๆ
+    # ใช้ Dynamic Scaling
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled = scaler.fit_transform(data)
     
@@ -91,7 +111,6 @@ def predict_price(symbol: str = "BTCUSDT", timeframe: str = "1h"):
     pred_scaled = model.predict(X, verbose=0)
     
     # แปลงกลับเป็นราคาจริง
-    # สร้าง dummy array เพื่อ inverse transform (ใส่ค่าทำนายที่คอลัมน์แรก)
     dummy = np.zeros((1, len(FEATURE_COLUMNS)))
     dummy[0, 0] = pred_scaled[0, 0]
     pred = scaler.inverse_transform(dummy)
@@ -105,15 +124,6 @@ def predict_price(symbol: str = "BTCUSDT", timeframe: str = "1h"):
 def predict_with_history(symbol: str = "BTCUSDT", timeframe: str = "1h", history_limit: int = 50):
     """
     ทำนายราคาพร้อมคืนค่าข้อมูลย้อนหลังสำหรับแสดงกราฟ
-    ใช้ Multi-Feature Input และ Dynamic Scaling
-    
-    Args:
-        symbol: สัญลักษณ์เหรียญ
-        timeframe: กรอบเวลา
-        history_limit: จำนวนข้อมูลย้อนหลังที่ต้องการ
-    
-    Returns:
-        Dict ที่มี times, actual_prices, predicted_prices, current, predicted
     """
     # ดึงข้อมูลพร้อม features
     df, _ = get_training_data(symbol=symbol, interval=timeframe, limit=history_limit + WINDOW + 50)
@@ -142,7 +152,7 @@ def predict_with_history(symbol: str = "BTCUSDT", timeframe: str = "1h", history
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled = scaler.fit_transform(data)
     
-    # สร้าง predictions สำหรับแต่ละจุดใน history
+    # สร้าง predictions
     actual_prices = []
     predicted_prices = []
     time_labels = []

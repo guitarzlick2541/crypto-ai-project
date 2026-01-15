@@ -1,5 +1,6 @@
 fastapi
-uvicorn
+uvicorn[standard]
+requests
 python-binance
 pandas
 numpy
@@ -7,4 +8,6 @@ tensorflow
 scikit-learn
 joblib
 apscheduler
-
+pytest
+httpx
+watchfiles
