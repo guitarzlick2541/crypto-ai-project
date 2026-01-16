@@ -1,12 +1,12 @@
 """
-สคริปต์ Training LSTM สำหรับ timeframe 5 นาที
-ใช้ Multi-Feature Input เพื่อเพิ่มความแม่นยำในการทำนาย
-Features: close, open, high, low, volume, price_change, volatility, 
-          ma_5, ma_10, ma_20, macd, rsi, bb_position, volume_change, price_position
+สคริปต์ Training LSTM แบบ Generic รองรับทุก Timeframe
+เรียกใช้: python train_model.py --timeframe 1h
 """
 
+import argparse
 import os
 import sys
+
 # บังคับ encoding เป็น utf-8 เพื่อรองรับ path ภาษาไทย
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -19,8 +19,13 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
 
+# ===== Parse Arguments =====
+parser = argparse.ArgumentParser(description='Train LSTM Model for Crypto AI')
+parser.add_argument('--timeframe', type=str, required=True, help='Timeframe to train (e.g., 5m, 1h, 4h)')
+args = parser.parse_args()
+
 # ===== การตั้งค่า Configuration =====
-TIMEFRAME = "5m"
+TIMEFRAME = args.timeframe
 WINDOW = 20  # จำนวนแท่งเทียนที่ใช้เป็น input
 EPOCHS = 100
 BATCH_SIZE = 32

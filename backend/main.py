@@ -27,23 +27,16 @@ app = FastAPI(title="CryptoAI API", version="1.0.0", lifespan=lifespan)
 @app.post("/retrain")
 def retrain_model(timeframe: str = "1h"):
     """สั่งเทรนโมเดลใหม่ตาม Timeframe ที่ระบุ"""
-    script_map = {
-        "5m": "train_lstm_5m.py",
-        "1h": "train_lstm_1h.py",
-        "4h": "train_lstm_4h.py"
-    }
-
-    if timeframe not in script_map:
+    if timeframe not in ["5m", "1h", "4h"]:
         return {"status": "error", "message": "Invalid timeframe"}
 
-    script_name = script_map[timeframe]
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    script_path = os.path.join(current_dir, script_name)
+    script_path = os.path.join(current_dir, "train_model.py")
     
     try:
-        # รันสคริปต์เทรนแยกเป็น Subprocess (อาจใช้เวลาสักพัก)
+        # รันสคริปต์เทรนแบบ Generic โดยส่ง Parameter ไป
         result = subprocess.run(
-            [sys.executable, script_path], 
+            [sys.executable, script_path, "--timeframe", timeframe], 
             capture_output=True, 
             text=True,
             encoding='utf-8',  # บังคับอ่าน output เป็น utf-8

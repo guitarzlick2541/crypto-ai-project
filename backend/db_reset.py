@@ -5,7 +5,9 @@
 import sqlite3
 import os
 
-DB_PATH = "crypto_ai.db"
+# ใช้ absolute path จากตำแหน่งของไฟล์นี้เสมอ เพื่อความชัวร์
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(CURRENT_DIR, "crypto_ai.db")
 
 print("=" * 50)
 print("  🔄 Database Reset Script")
